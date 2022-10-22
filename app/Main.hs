@@ -15,7 +15,7 @@ cards = [
   Card {
       color = x
     , number = y
-  } | x <- [R, G, B, Y], y <- [0..9] ]
+  } | x <- [RED, GREEN, BLUE, YELLOW], y <- [0..9] ]
 
 cardValid :: Card -> Card -> Bool
 cardValid c1 c2 =
@@ -32,22 +32,29 @@ main = do
       then
         do
           randomList <- replicateM (length cards) (R.randomRIO (1 :: Int, 100000))
-          print $ ditributeCards (randomize cards randomList) n
+          let randomCards = randomize cards randomList
+          let users = ditributeCards randomCards n
+          let unusedCards = drop (n * 4) randomCards
+          print unusedCards
       else putStrLn "Invalid number of players" >> main
   where
     getNumberPlayer :: IO (Maybe Int)
     getNumberPlayer = do readMaybe <$> getLine
 
-ditributeCards :: [Card] -> Int -> [User]
-ditributeCards cards = generateUserCards 0
+    usedCards :: Users -> [Card]
+    usedCards (u : us) = userCards u ++ usedCards us
+    usedCards _ = []
+
+ditributeCards :: [Card] -> Int -> Users
+ditributeCards cards = generateUser 0
   where
-    generateUserCards :: Int -> Int -> [User]
-    generateUserCards n t
+    generateUser :: Int -> Int -> Users
+    generateUser n t
       | n < t =
           User {
               pos = n
             , userCards = drop (4 * n) $ assignCards n cards
-          } : generateUserCards (n + 1) t
+          } : generateUser (n + 1) t
       | otherwise = []
     assignCards :: Int -> [Card] -> [Card]
-    assignCards n = take $ 4 * (n+1)
+    assignCards n = take $ 4 * (n + 1)

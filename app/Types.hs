@@ -1,8 +1,9 @@
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Types where
 
-data Color = R | G | B | Y deriving (Show, Eq)
+data Color = RED | GREEN | BLUE | YELLOW deriving (Show, Eq)
 
 type Number = Int
 
@@ -18,4 +19,10 @@ instance Show Card where
 data User = User
   { pos       :: Number
   , userCards :: [Card]
-  } deriving (Show)
+  }
+
+instance Show User where
+  show :: User -> String
+  show u = "User: " ++ show (pos u) ++ "\n" ++ "Cards: " ++ show (userCards u) ++ "\n"
+
+type Users = [User]
