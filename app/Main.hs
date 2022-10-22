@@ -2,7 +2,7 @@ module Main where
 
 import Control.Monad (replicateM)
 import Data.Function (on)
-import Data.List     (sortBy)
+import Data.List     (sortBy, elemIndex)
 import qualified System.Random as R
 import           Text.Read (readMaybe)
 import            Types
@@ -16,10 +16,11 @@ cards = [
   Card {
       color = x
     , number = y
-  } | x <- [RED, GREEN, BLUE, YELLOW], y <- [0..9] ]
+  } | x <- [R, G, B, Y], y <- [0..9] ]
 
-cardValid :: Card -> Card -> Bool
-cardValid c1 c2 =
+validCard :: Maybe Card -> Card -> Bool
+validCard Nothing c2 = True
+validCard (Just c1) c2 =
   color  c1 == color  c2 ||
   number c1 == number c2
 
@@ -36,7 +37,7 @@ main = do
           let randomCards = randomize cards randomList
           let users = ditributeCards randomCards n
           let unusedCards = drop (n * cardsByPlayer) randomCards
-          print unusedCards
+          startGame unusedCards [] users
       else putStrLn "Invalid number of players" >> main
   where
     getNumberPlayer :: IO (Maybe Int)
@@ -59,3 +60,35 @@ ditributeCards cards = generateUser 0
       | otherwise = []
     assignCards :: Int -> [Card] -> [Card]
     assignCards n = take $ cardsByPlayer * (n + 1)
+
+startGame :: [Card] -> [Card] -> Users -> IO ()
+startGame unusedCards playedCards users = do
+  putStrLn "--------------------------------------------------------"
+  putStrLn "Start of game!"
+  putStrLn "--------------------------------------------------------"
+  userPlay unusedCards playedCards users 0
+
+getPosition :: Int -> Int -> Int
+getPosition c t = if c < t - 1 then c + 1 else 0
+
+userPlay :: [Card] -> [Card] -> Users -> Int -> IO ()
+userPlay unusedCards playedCards users pos = do
+  case playedCards of
+    [] -> putStrLn "Nothing played yet"
+    _  -> do
+      putStr "Last played card:"
+      print $ head playedCards
+  let currentUser = users !! pos
+  putStr "Your cards: "
+  print $ userCards currentUser
+  putStrLn "Select your card to play: "
+  input <- getLine
+  case input of
+    [c, n] -> do
+      case fromCharToColor c of
+        Just color -> do
+          let cardPlayed = Card { color = color, number  = read [n] }
+          let cardExist = cardPlayed `elem` userCards currentUser
+          if cardExist then userPlay unusedCards [cardPlayed] users $ getPosition pos (length users)  else print "try again"
+        _    -> putStrLn "Wrong card"
+    _      -> putStrLn "Wrong card"
