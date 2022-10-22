@@ -71,13 +71,15 @@ startGame unusedCards playedCards users = do
 getPosition :: Int -> Int -> Int
 getPosition c t = if c < t - 1 then c + 1 else 0
 
+lastCardPlayed :: [Card] -> Maybe Card
+lastCardPlayed [] = Nothing
+lastCardPlayed (c : cs) = Just c
+
 userPlay :: [Card] -> [Card] -> Users -> Int -> IO ()
 userPlay unusedCards playedCards users pos = do
-  case playedCards of
-    [] -> putStrLn "Nothing played yet"
-    _  -> do
-      putStr "Last played card:"
-      print $ head playedCards
+  putStrLn ""
+  putStrLn $ "Played cards: " ++ show playedCards
+  putStrLn $ "User " ++ show pos
   let currentUser = users !! pos
   putStr "Your cards: "
   print $ userCards currentUser
@@ -89,6 +91,14 @@ userPlay unusedCards playedCards users pos = do
         Just color -> do
           let cardPlayed = Card { color = color, number  = read [n] }
           let cardExist = cardPlayed `elem` userCards currentUser
-          if cardExist then userPlay unusedCards [cardPlayed] users $ getPosition pos (length users)  else print "try again"
-        _    -> putStrLn "Wrong card"
-    _      -> putStrLn "Wrong card"
+          if cardExist && validCard (lastCardPlayed playedCards) cardPlayed
+            then userPlay unusedCards (cardPlayed : playedCards) users $ getPosition pos (length users)
+            else tryAgain
+        _    -> tryAgain
+    "q"      -> putStrLn "Exit game"
+    _        -> tryAgain
+  where
+    tryAgain :: IO ()
+    tryAgain = do
+      putStrLn "Wrong card, please try again"
+      userPlay unusedCards playedCards users pos
