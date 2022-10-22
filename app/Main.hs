@@ -6,6 +6,7 @@ import Data.List     (sortBy)
 import qualified System.Random as R
 import           Text.Read (readMaybe)
 import            Types
+import            Constants
 
 randomize :: [Card] -> [Int] -> [Card]
 randomize xs ys = map fst $ sortBy (compare `on` snd) (zip xs ys)
@@ -28,13 +29,13 @@ main = do
   mn <- getNumberPlayer
   case mn of
     Nothing -> putStrLn "Enter a valid number of players" >> main
-    Just n  -> if n >= 2 && n <= 5
+    Just n  -> if n >= minimumPlayers && n <= maximumPlayers
       then
         do
           randomList <- replicateM (length cards) (R.randomRIO (1 :: Int, 100000))
           let randomCards = randomize cards randomList
           let users = ditributeCards randomCards n
-          let unusedCards = drop (n * 4) randomCards
+          let unusedCards = drop (n * cardsByPlayer) randomCards
           print unusedCards
       else putStrLn "Invalid number of players" >> main
   where
@@ -53,8 +54,8 @@ ditributeCards cards = generateUser 0
       | n < t =
           User {
               pos = n
-            , userCards = drop (4 * n) $ assignCards n cards
+            , userCards = drop (cardsByPlayer * n) $ assignCards n cards
           } : generateUser (n + 1) t
       | otherwise = []
     assignCards :: Int -> [Card] -> [Card]
-    assignCards n = take $ 4 * (n + 1)
+    assignCards n = take $ cardsByPlayer * (n + 1)
