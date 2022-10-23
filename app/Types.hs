@@ -3,6 +3,8 @@
 
 module Types where
 
+data Action = Take | Play deriving (Eq)
+
 data Color = R | G | B | Y deriving (Show, Eq, Read)
 
 type Number = Int
