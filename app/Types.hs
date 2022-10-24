@@ -3,6 +3,14 @@
 
 module Types where
 
+data Difficulty = Low | Medium | High deriving (Show, Eq)
+
+fromCharToDifficulty :: Char -> Difficulty
+fromCharToDifficulty '1' = Low
+fromCharToDifficulty '2' = Medium
+fromCharToDifficulty '3' = High
+fromCharToDifficulty _   = Low
+
 data Action = Take | Play deriving (Eq)
 
 data Color = R | G | B | Y deriving (Show, Eq, Read)
