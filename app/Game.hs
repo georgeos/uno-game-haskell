@@ -46,7 +46,9 @@ userPlay unusedCards playedCards users pos = do
           if cardExist && validCard (lastCardPlayed playedCards) cardPlayed
             then do
               let updatedUsers = updateUserCards users pos Play cardPlayed
-              userPlay unusedCards (cardPlayed : playedCards) updatedUsers $ getPosition pos (length users)
+              if null (userCards $ updatedUsers !! pos)
+                then putStrLn "¡¡¡YOU WIN!!!"
+                else userPlay unusedCards (cardPlayed : playedCards) updatedUsers $ getPosition pos (length users)
             else tryAgain
         _    -> tryAgain
     "Q"      -> putStrLn "Exit game"
