@@ -42,7 +42,7 @@ userPlay unusedCards playedCards users pos = do
       case fromCharToColor c of
         Just color -> do
           let cardPlayed = Card { color = color, number  = read [n] }
-          let cardExist = cardPlayed `elem` userCards currentUser
+              cardExist = cardPlayed `elem` userCards currentUser
           if cardExist && validCard (lastCardPlayed playedCards) cardPlayed
             then do
               let updatedUsers = updateUserCards users pos Play cardPlayed
@@ -54,7 +54,7 @@ userPlay unusedCards playedCards users pos = do
     "Q"      -> putStrLn "Exit game"
     "T"      -> do
       let takenCard = head unusedCards
-      let updatedUsers = updateUserCards users pos Take takenCard
+          updatedUsers = updateUserCards users pos Take takenCard
       userPlay (drop 1 unusedCards) playedCards updatedUsers pos
     _        -> tryAgain
   where

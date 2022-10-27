@@ -5,11 +5,10 @@ module Types where
 
 data Difficulty = Low | Medium | High deriving (Show, Eq)
 
-fromCharToDifficulty :: Char -> Difficulty
-fromCharToDifficulty '1' = Low
-fromCharToDifficulty '2' = Medium
-fromCharToDifficulty '3' = High
-fromCharToDifficulty _   = Low
+fromIntToDifficulty :: Int -> Difficulty
+fromIntToDifficulty 1 = Low
+fromIntToDifficulty 2 = Medium
+fromIntToDifficulty 3 = High
 
 data Action = Take | Play deriving (Eq)
 
