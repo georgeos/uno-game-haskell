@@ -8,6 +8,7 @@ import           Text.Read (readMaybe)
 import            Types
 import            Constants
 import            Game
+import Control.Monad.State
 
 main :: IO ()
 main = do
@@ -20,7 +21,9 @@ main = do
   let randomCards = randomize d randomList
       unusedCards = drop (n * cardsByPlayer) randomCards
       users = ditributeCards randomCards n
-  startGame unusedCards [] users
+      state = GameState { unusedCards = unusedCards, playedCards = [], users = users, currentPos = 0 }
+
+  void $ execStateT startGame state
 
 introduction :: IO ()
 introduction = do

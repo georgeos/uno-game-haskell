@@ -42,3 +42,10 @@ instance Show User where
   show u = "User: " ++ show (pos u) ++ "\n" ++ "Cards: " ++ show (userCards u) ++ "\n"
 
 type Users = [User]
+
+data GameState = GameState
+  { unusedCards :: [Card]
+  , playedCards :: [Card]
+  , users       :: Users
+  , currentPos  :: Int
+  }

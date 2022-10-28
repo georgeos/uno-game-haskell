@@ -2,29 +2,31 @@ module Game where
 
 import Control.Lens.Operators ((.~), (&))
 import Control.Lens (element)
+import Control.Monad.State
 
 import Types
 
-startGame :: [Card] -> [Card] -> Users -> IO ()
-startGame unusedCards playedCards users = do
-  putStrLn ""
-  putStrLn "--------------------------------------------------------"
-  putStrLn "Start of game!"
-  putStrLn "--------------------------------------------------------"
-  userPlay unusedCards playedCards users 0
+startGame :: StateT GameState IO ()
+startGame = do
+  liftIO $ putStrLn ""
+  liftIO $ putStrLn "--------------------------------------------------------"
+  liftIO $ putStrLn "Start of game!"
+  liftIO $ putStrLn "--------------------------------------------------------"
+  void userPlay
 
-userPlay :: [Card] -> [Card] -> Users -> Int -> IO ()
-userPlay unusedCards playedCards users pos = do
-  putStrLn ""
-  putStrLn $ "User " ++ show pos
-  putStrLn $ "Last played card: " ++ show (lastCardPlayed playedCards)
+userPlay :: StateT GameState IO ()
+userPlay = do
+  state <- get
+  liftIO $ putStrLn ""
+  liftIO $ putStrLn $ "User " ++ show (currentPos state)
+  liftIO $ putStrLn $ "Last played card: " ++ show (lastCardPlayed $ playedCards state)
 
-  let currentUser = users !! pos
+  let currentUser = users state !! currentPos state
 
-  putStr "Your cards: "
-  print $ userCards currentUser
-  putStrLn "Enter your card to play or T to take one card or Q to quit: "
-  input <- getLine
+  liftIO $ putStr "Your cards: "
+  liftIO $ print $ userCards currentUser
+  liftIO $ putStrLn "Enter your card to play or T to take one card or Q to quit: "
+  input <- liftIO getLine
 
   case input of
     [c, n] -> do
@@ -34,36 +36,38 @@ userPlay unusedCards playedCards users pos = do
 
           let playedCard = Card { color = color, number  = read [n] }
               cardExists = playedCard `elem` userCards currentUser
-              validCard' = validCard (lastCardPlayed playedCards) playedCard
+              validCard' = validCard (lastCardPlayed $ playedCards state) playedCard
 
           if cardExists && validCard'
             then do
 
-              let updatedUsers = updateUserCards users pos Play playedCard
-                  playedCards' = playedCard : playedCards
-                  newPosition  = getPosition pos (length users)
+              let updatedUsers = updateUserCards (users state) (currentPos state) Play playedCard
+                  playedCards' = playedCard : playedCards state
+                  newPosition  = getPosition (currentPos state) (length $ users state)
 
-              if null (userCards $ updatedUsers !! pos)
-                then putStrLn "¡¡¡YOU WIN!!!"
-                else userPlay unusedCards playedCards' updatedUsers newPosition
-
+              if null (userCards $ updatedUsers !! currentPos state)
+                then liftIO $ putStrLn "¡¡¡YOU WIN!!!"
+                else do
+                  put $ state { playedCards = playedCards', users = updatedUsers, currentPos  = newPosition }
+                  void userPlay
             else tryAgain
         _    -> tryAgain
 
-    "Q"      -> putStrLn "Exit game"
+    "Q"      -> liftIO $ putStrLn "Exit game"
     "T"      -> do
-      let unusedCards' = if null unusedCards then reverse $ tail playedCards else unusedCards
-          playedCards' = if null unusedCards then [head playedCards] else playedCards
+      let unusedCards' = if null $ unusedCards state then reverse $ tail (playedCards state) else unusedCards state
+          playedCards' = if null $ unusedCards state then [head $ playedCards state] else playedCards state
           takenCard    = head unusedCards'
-          updatedUsers = updateUserCards users pos Take takenCard
-      userPlay (drop 1 unusedCards') playedCards' updatedUsers pos
+          updatedUsers = updateUserCards (users state) (currentPos state) Take takenCard
+      put $ state { unusedCards = drop 1 unusedCards', playedCards = playedCards', users = updatedUsers }
+      void userPlay
     _        -> tryAgain
 
   where
-    tryAgain :: IO ()
+    tryAgain :: StateT GameState IO ()
     tryAgain = do
-      putStrLn "Wrong card, please try again"
-      userPlay unusedCards playedCards users pos
+      liftIO $ putStrLn "Wrong card, please try again"
+      void userPlay
 
     updateUserCards :: Users -> Int -> Action -> Card -> Users
     updateUserCards users pos a card
