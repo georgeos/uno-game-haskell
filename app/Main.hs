@@ -27,25 +27,33 @@ main = do
 
 introduction :: IO ()
 introduction = do
-  putStrLn "--------------------------------------------------------"
-  putStrLn "WELCOME TO UNO GAME"
-  putStrLn "--------------------------------------------------------"
+  putStrLn "----------------------------------------------------------------------------------------------------------------"
+  putStrLn "----------------------------------------------------------------------------------------------------------------"
+  putStrLn "--------------------------------              WELCOME TO UNO GAME            -----------------------------------"
+  putStrLn "----------------------------------------------------------------------------------------------------------------"
+  putStrLn "----------------------------------------------------------------------------------------------------------------"
   putStrLn ""
   putStrLn "Instructions:"
+  putStrLn "- There are different cards composed by Color and Number"
+  putStrLn "    - Color: Red (R), Blue (B), Green (G) and Yellow (Y)"
+  putStrLn "    - Number: 0 to X, where X depends of the difficulty of the game"
+  putStrLn "- Example: R1, B4, Y9, etc."
   putStrLn "- Every player has a set of cards"
   putStrLn "- Every player must play a similar card (color or number) to the previous played card"
   putStrLn "- If the player doesn't have a similar card, then must take one card from the main set"
   putStrLn "- First player without having cards, WINS!"
   putStrLn ""
   putStrLn "Lets play!"
+  putStrLn "----------------------------------------------------------------------------------------------------------------"
+  putStrLn "----------------------------------------------------------------------------------------------------------------"
 
 getDifficulty :: IO Difficulty
 getDifficulty = do
   putStrLn ""
   putStrLn "Select the difficulty: "
-  putStrLn "1) Low"
-  putStrLn "2) Medium"
-  putStrLn "3) High"
+  putStrLn "1) Low -> cards from 0-3"
+  putStrLn "2) Medium -> cards from 0-6"
+  putStrLn "3) High -> cards from 0-9"
   difficulty <- readMaybe <$> getLine
 
   case difficulty of
@@ -74,8 +82,8 @@ cards :: Difficulty -> [Card]
 cards d = [Card { color = x, number = y} | x <- [R, G, B, Y], y <- [0..a]]
   where
     a :: Int
-    a | d == Low    = 4
-      | d == Medium = 7
+    a | d == Low    = 3
+      | d == Medium = 6
       | otherwise   = 9
 
 ditributeCards :: [Card] -> Int -> Users

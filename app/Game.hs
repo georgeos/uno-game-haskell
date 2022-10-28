@@ -46,7 +46,7 @@ userPlay = do
                   newPosition  = getPosition (currentPos state) (length $ users state)
 
               if null (userCards $ updatedUsers !! currentPos state)
-                then liftIO $ putStrLn "¡¡¡YOU WIN!!!"
+                then liftIO $ putStrLn "--------------------------------              ¡¡¡YOU WIN!!!            -----------------------------------"
                 else do
                   put $ state { playedCards = playedCards', users = updatedUsers, currentPos  = newPosition }
                   void userPlay
