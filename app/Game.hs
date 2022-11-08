@@ -3,6 +3,7 @@ module Game where
 import Control.Lens.Operators ((.~), (&))
 import Control.Lens (element)
 import Control.Monad.State
+import System.Console.ANSI
 
 import Types
 
@@ -48,6 +49,7 @@ userPlay = do
               if null (userCards $ updatedUsers !! currentPos state)
                 then liftIO $ putStrLn "--------------------------------              ¡¡¡YOU WIN!!!            -----------------------------------"
                 else do
+                  liftIO clearScreen
                   put $ state { playedCards = playedCards', users = updatedUsers, currentPos  = newPosition }
                   void userPlay
             else tryAgain
@@ -55,6 +57,7 @@ userPlay = do
 
     "Q"      -> liftIO $ putStrLn "Exit game"
     "T"      -> do
+      liftIO clearScreen
       let unusedCards' = if null $ unusedCards state then reverse $ tail (playedCards state) else unusedCards state
           playedCards' = if null $ unusedCards state then [head $ playedCards state] else playedCards state
           takenCard    = head unusedCards'
@@ -66,6 +69,7 @@ userPlay = do
   where
     tryAgain :: StateT GameState IO ()
     tryAgain = do
+      liftIO clearScreen
       liftIO $ putStrLn "Wrong card, please try again"
       void userPlay
 
