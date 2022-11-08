@@ -4,8 +4,9 @@ import Control.Lens.Operators ((.~), (&))
 import Control.Lens (element)
 import Control.Monad.State
 import System.Console.ANSI
-
+import Data.Maybe (isNothing)
 import Types
+import Util
 
 startGame :: StateT GameState IO ()
 startGame = do
@@ -20,12 +21,13 @@ userPlay = do
   state <- get
   liftIO $ putStrLn ""
   liftIO $ putStrLn $ "User " ++ show (currentPos state)
-  liftIO $ putStrLn $ "Last played card: " ++ show (lastCardPlayed $ playedCards state)
+  liftIO $ putStr "Last played card: "
+  liftIO . printMaybeCard . lastCardPlayed $ playedCards state
 
   let currentUser = users state !! currentPos state
 
   liftIO $ putStr "Your cards: "
-  liftIO $ print $ userCards currentUser
+  liftIO $ printCards (userCards currentUser) >> putStrLn ""
   liftIO $ putStrLn "Enter your card to play or T to take one card or Q to quit: "
   input <- liftIO getLine
 
@@ -70,7 +72,10 @@ userPlay = do
     tryAgain :: StateT GameState IO ()
     tryAgain = do
       liftIO clearScreen
+      liftIO $ setSGR [SetConsoleIntensity BoldIntensity]
+      liftIO $ setSGR [SetColor Foreground Dull Red]
       liftIO $ putStrLn "Wrong card, please try again"
+      liftIO $ setSGR [Reset]
       void userPlay
 
     updateUserCards :: Users -> Int -> Action -> Card -> Users
