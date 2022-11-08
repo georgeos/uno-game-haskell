@@ -1,12 +1,32 @@
 module Game where
 
-import Control.Lens.Operators ((.~), (&))
 import Control.Lens (element)
+import Control.Lens.Operators ((&), (.~))
 import Control.Monad.State
-import System.Console.ANSI
+  ( MonadIO (liftIO),
+    MonadState (get, put),
+    StateT,
+    void,
+  )
 import Data.Maybe (isNothing)
+import System.Console.ANSI
+  ( Color (Red),
+    ColorIntensity (Dull),
+    ConsoleIntensity (BoldIntensity),
+    ConsoleLayer (Foreground),
+    SGR (Reset, SetColor, SetConsoleIntensity),
+    clearScreen,
+    setSGR,
+  )
 import Types
-import Util
+  ( Action (..),
+    Card (..),
+    GameState (currentPos, playedCards, unusedCards, users),
+    User (User, pos, userCards),
+    Users,
+    fromCharToColor,
+  )
+import Util (printCards, printMaybeCard)
 
 startGame :: StateT GameState IO ()
 startGame = do

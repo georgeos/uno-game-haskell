@@ -1,9 +1,22 @@
 module Util where
 
-import Control.Monad.State
+import Control.Monad.State (MonadIO (liftIO))
 import System.Console.ANSI
+  ( Color (Blue, Green, Red, Yellow),
+    ColorIntensity (Dull),
+    ConsoleIntensity (BoldIntensity),
+    ConsoleLayer (Foreground),
+    SGR (Reset, SetColor, SetConsoleIntensity),
+    setSGR,
+  )
 import System.Console.ANSI.Types
-import Types
+  ( Color (Blue, Green, Red, Yellow),
+    ColorIntensity (Dull),
+    ConsoleIntensity (BoldIntensity),
+    ConsoleLayer (Foreground),
+    SGR (Reset, SetColor, SetConsoleIntensity),
+  )
+import Types (Card (color), Color (B, G, R, Y))
 
 printMaybeCard :: Maybe Card -> IO ()
 printMaybeCard card =

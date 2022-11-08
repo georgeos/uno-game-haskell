@@ -1,14 +1,22 @@
 module Main where
 
+import Constants (cardsByPlayer, maximumPlayers, minimumPlayers)
 import Control.Monad (replicateM)
+import Control.Monad.State (execStateT, replicateM, void)
 import Data.Function (on)
-import Data.List     (sortBy, elemIndex)
+import Data.List (elemIndex, sortBy)
+import Game (startGame)
 import qualified System.Random as R
-import           Text.Read (readMaybe)
-import            Types
-import            Constants
-import            Game
-import Control.Monad.State
+import Text.Read (readMaybe)
+import Types
+  ( Card (..),
+    Color (B, G, R, Y),
+    Difficulty (Low, Medium),
+    GameState (GameState, currentPos, playedCards, unusedCards, users),
+    User (User, pos, userCards),
+    Users,
+    fromIntToDifficulty,
+  )
 
 main :: IO ()
 main = do
