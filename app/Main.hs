@@ -6,14 +6,16 @@ import Control.Monad.State (execStateT, replicateM, void)
 import Data.Function (on)
 import Data.List (elemIndex, sortBy)
 import Game (startGame)
+import System.Console.ANSI (Color (..), ColorIntensity (..), ConsoleIntensity (..), clearScreen, setSGR)
+import System.Console.ANSI.Types (ConsoleLayer (Foreground), SGR (..))
 import qualified System.Random as R
 import Text.Read (readMaybe)
 import Types
   ( Card (..),
-    Color (B, G, R, Y),
-    Difficulty (Low, Medium),
-    GameState (GameState, currentPos, playedCards, unusedCards, users),
-    User (User, pos, userCards),
+    Color (..),
+    Difficulty (..),
+    GameState (..),
+    User (..),
     Users,
     fromIntToDifficulty,
   )
@@ -35,33 +37,40 @@ main = do
 
 introduction :: IO ()
 introduction = do
-  putStrLn "----------------------------------------------------------------------------------------------------------------"
-  putStrLn "----------------------------------------------------------------------------------------------------------------"
-  putStrLn "--------------------------------              WELCOME TO UNO GAME            -----------------------------------"
-  putStrLn "----------------------------------------------------------------------------------------------------------------"
-  putStrLn "----------------------------------------------------------------------------------------------------------------"
-  putStrLn ""
-  putStrLn "Instructions:"
-  putStrLn "- There are different cards composed by Color and Number"
-  putStrLn "    - Color: Red (R), Blue (B), Green (G) and Yellow (Y)"
-  putStrLn "    - Number: 0 to X, where X depends of the difficulty of the game"
-  putStrLn "- Example: R1, B4, Y9, etc."
-  putStrLn "- Every player has a set of cards"
-  putStrLn "- Every player must play a similar card (color or number) to the previous played card"
-  putStrLn "- If the player doesn't have a similar card, then must take one card from the main set"
-  putStrLn "- First player without having cards, WINS!"
-  putStrLn ""
-  putStrLn "Lets play!"
-  putStrLn "----------------------------------------------------------------------------------------------------------------"
-  putStrLn "----------------------------------------------------------------------------------------------------------------"
+  clearScreen
+  setSGR [SetColor Foreground Dull Green, SetConsoleIntensity BoldIntensity]
+  putStr $
+    unlines
+    [ "----------------------------------------------------------------------------------------------------------------",
+      "----------------------------------------------------------------------------------------------------------------",
+      "--------------------------------              WELCOME TO UNO GAME            -----------------------------------",
+      "----------------------------------------------------------------------------------------------------------------",
+      "----------------------------------------------------------------------------------------------------------------",
+      "",
+      "Instructions:",
+      "- There are different cards composed by Color and Number",
+      "    - Color: Red (R), Blue (B), Green (G) and Yellow (Y)",
+      "    - Number: 0 to X, where X depends of the difficulty of the game",
+      "- Example: R1, B4, Y9, etc.",
+      "- Every player has a set of cards",
+      "- Every player must play a similar card (color or number) to the previous played card",
+      "- If the player doesn't have a similar card, then must take one card from the main set",
+      "- First player without having cards, WINS!",
+      "",
+      "Lets play!",
+      "----------------------------------------------------------------------------------------------------------------",
+      "----------------------------------------------------------------------------------------------------------------" ]
+  setSGR [Reset]
 
 getDifficulty :: IO Difficulty
 getDifficulty = do
-  putStrLn ""
-  putStrLn "Select the difficulty: "
-  putStrLn "1) Low -> cards from 0-3"
-  putStrLn "2) Medium -> cards from 0-6"
-  putStrLn "3) High -> cards from 0-9"
+  putStrLn $
+    unlines
+    [ "",
+      "Select the difficulty: ",
+      "1) Low -> cards from 0-3",
+      "2) Medium -> cards from 0-6",
+      "3) High -> cards from 0-9"]
   difficulty <- readMaybe <$> getLine
 
   case difficulty of

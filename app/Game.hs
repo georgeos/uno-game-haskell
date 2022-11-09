@@ -27,28 +27,35 @@ import Types
     fromCharToColor,
   )
 import Util (printCards, printMaybeCard)
+import System.Console.ANSI.Codes (Color(..))
 
 startGame :: StateT GameState IO ()
 startGame = do
-  liftIO $ putStrLn ""
-  liftIO $ putStrLn "--------------------------------------------------------"
-  liftIO $ putStrLn "Start of game!"
-  liftIO $ putStrLn "--------------------------------------------------------"
+  liftIO $
+    clearScreen
+    >> setSGR [SetColor Foreground Dull Yellow, SetConsoleIntensity BoldIntensity]
+    >> putStrLn ""
+    >> putStrLn "--------------------------------------------------------"
+    >> putStrLn "Start of game!"
+    >> putStrLn "--------------------------------------------------------"
+    >> setSGR [Reset]
   void userPlay
 
 userPlay :: StateT GameState IO ()
 userPlay = do
   state <- get
-  liftIO $ putStrLn ""
-  liftIO $ putStrLn $ "User " ++ show (currentPos state)
-  liftIO $ putStr "Last played card: "
-  liftIO . printMaybeCard . lastCardPlayed $ playedCards state
+  liftIO $
+    putStrLn ""
+    >> putStrLn ("User " ++ show (currentPos state))
+    >> putStr "Last played card: "
+    >> (printMaybeCard . lastCardPlayed $ playedCards state)
 
   let currentUser = users state !! currentPos state
 
-  liftIO $ putStr "Your cards: "
-  liftIO $ printCards (userCards currentUser) >> putStrLn ""
-  liftIO $ putStrLn "Enter your card to play or T to take one card or Q to quit: "
+  liftIO $
+    putStr "Your cards: "
+    >> printCards (userCards currentUser) >> putStrLn ""
+    >> putStrLn "Enter your card to play or T to take one card or Q to quit: "
   input <- liftIO getLine
 
   case input of
@@ -69,7 +76,16 @@ userPlay = do
                   newPosition  = getPosition (currentPos state) (length $ users state)
 
               if null (userCards $ updatedUsers !! currentPos state)
-                then liftIO $ putStrLn "--------------------------------              ¡¡¡YOU WIN!!!            -----------------------------------"
+                then
+                  liftIO $
+                    setSGR [SetColor Foreground Dull Green, SetConsoleIntensity BoldIntensity]
+                    >> putStrLn (unlines
+                        [ "----------------------------------------------------------------------------------------------------------",
+                          "----------------------------------------------------------------------------------------------------------",
+                          "--------------------------------              ¡¡¡YOU WIN!!!            -----------------------------------",
+                          "----------------------------------------------------------------------------------------------------------",
+                          "----------------------------------------------------------------------------------------------------------" ])
+                    >> setSGR [Reset]
                 else do
                   liftIO clearScreen
                   put $ state { playedCards = playedCards', users = updatedUsers, currentPos  = newPosition }
@@ -91,11 +107,11 @@ userPlay = do
   where
     tryAgain :: StateT GameState IO ()
     tryAgain = do
-      liftIO clearScreen
-      liftIO $ setSGR [SetConsoleIntensity BoldIntensity]
-      liftIO $ setSGR [SetColor Foreground Dull Red]
-      liftIO $ putStrLn "Wrong card, please try again"
-      liftIO $ setSGR [Reset]
+      liftIO $
+        clearScreen
+        >> setSGR [SetColor Foreground Dull Red, SetConsoleIntensity BoldIntensity]
+        >> putStrLn "Wrong card, please try again"
+        >> setSGR [Reset]
       void userPlay
 
     updateUserCards :: Users -> Int -> Action -> Card -> Users
